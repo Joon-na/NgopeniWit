@@ -11,25 +11,25 @@ const infoBudidaya = [
     title: "Bayam",
     description:
       "Bayam adalah tumbuhan yang biasa ditanam untuk dikonsumsi daunnya sebagai sayuran hijau. Tumbuhan ini berasal dari Amerika tropik namun sekarang tersebar ke seluruh dunia. Tumbuhan ini dikenal sebagai sayuran sumber zat besi yang penting bagi tubuh",
-    image: "./src/assets/bayam.png",
+    image: "./images/bayam.png",
   },
   {
     title: "Cabai",
     description:
       "Cabai adalah buah dan tumbuhan anggota genus Capsicum. Buahnya dapat digolongkan sebagai sayuran, rempah, atau bumbu, tergantung bagaimana pemanfaatannya. Buah cabai yang belum matang biasa bewarna hijau atau putih, dan disaat matang buah cabai dapat bewarna merah atau ungu",
-    image: "./src/assets/cabai.png",
+    image: "./images/cabai.png",
   },
   {
     title: "Mangga",
     description:
       "Mangga, mempelam, atau pauh adalah nama sejenis buah, demikian pula nama pohonnya. Mangga termasuk ke dalam genus Mangifera, yang terdiri dari 35-40 anggota dari famili Anacardiaceae.",
-    image: "./src/assets/mangga.png",
+    image: "./images/mangga.png",
   },
   {
     title: "Kemangi",
     description:
       "Kemangi adalah terna kecil yang daunnya biasa dimakan sebagai lalap. Aroma daunnya khas, kuat namun lembut dengan sentuhan aroma limau. Daun kemangi merupakan salah satu bumbu bagi pepes",
-    image: "./src/assets/kemangi.png",
+    image: "./images/kemangi.png",
   },
 ];
 

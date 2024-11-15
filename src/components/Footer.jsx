@@ -38,7 +38,7 @@ const Footer = () => {
                 <span className="sr-only">Twitter</span>
               </a>
               <a
-                href="mailto:info@plantcare.com"
+                href="#"
                 className="text-[#142e38] hover:text-[#318161] transition-colors duration-300"
               >
                 <Mail size={20} />
