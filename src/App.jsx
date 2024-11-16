@@ -4,6 +4,7 @@ import Layout from './pages/Layout';
 import Home from './pages/Home';
 import BudidayaTracker from './pages/BudidayaTracker'
 import Statistics from './pages/Statistics'
+import InfoBudidaya from './pages/InfoBudidaya';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="budidaya-tracker" element={<BudidayaTracker />} />
+          <Route path="info-budidaya" element={<InfoBudidaya />} />
           <Route path="statistics" element={<Statistics />} />
         </Route>
       </Routes>
