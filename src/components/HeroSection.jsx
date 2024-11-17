@@ -22,7 +22,7 @@ const HeroSection = () => {
         {/* Right Section */}
         <div className="w-full md:w-1/2 flex justify-center">
           <img
-            src="./src/assets/images/plant-image.png"
+            src="/images/plant-image.png"
             alt="plant-image"
             className="w-3/4 md:w-4/5 max-w-[400px] md:max-w-[700px] object-cover"
           />
