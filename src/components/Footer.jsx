@@ -9,7 +9,7 @@ const Footer = () => {
           <div className="mb-8 md:mb-0">
             <div className="w-52">
               <a href="#">
-                <img className="mb-3" src="./src/assets/Logo.svg" alt="logo" />
+                <img className="mb-3" src="./src/assets/images/Logo.svg" alt="logo" />
               </a>
             </div>
             <p className="text-sm mb-4">

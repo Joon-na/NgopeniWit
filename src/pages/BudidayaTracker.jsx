@@ -17,9 +17,9 @@ export default function BudidayaTracker() {
   });
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState("");
-  const [wateringTime, setWateringTime] = useState(""); // State for watering time
+  const [wateringTime, setWateringTime] = useState("");
   const [notifiedPlants, setNotifiedPlants] = useState([]);
-  const notificationSound = new Audio("/sound/notif.mp3");
+  const notificationSound = new Audio("./src/assets/sound/notif.mp3");
 
   useEffect(() => {
     fetchPlants();
@@ -42,7 +42,7 @@ export default function BudidayaTracker() {
         if (timeDifference < 60 && !notifiedPlants.includes(plant.id)) {
           notificationSound.play();
           // Menampilkan toast notifikasi
-          toast.info(`Waktu penyiraman untuk tanaman ${plant.name} telah tiba! 🌱`, {
+          toast.info(`Waktu penyiraman untuk tanaman ${plant.name} telah tiba!`, {
             position: "bottom-right",
             autoClose: false,
             hideProgressBar: false,

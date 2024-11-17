@@ -107,7 +107,7 @@ export default function AIChatOverlay() {
             {messages.length === 0 && (
               <div className="text-center flex flex-col justify-center items-center text-gray-600 mt-8">
                 <div className="w-40">
-                  <img src="./images/Logo.svg" alt="logo" />
+                  <img src="./src/assets/images/Logo.svg" alt="logo" />
                 </div>
                 <div className="mt-4 space-y-2 text-sm">
                   <p className="font-medium">Kami siap membantu Anda dengan:</p>
