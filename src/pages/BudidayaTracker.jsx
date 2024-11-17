@@ -1,99 +1,159 @@
-import React, { useState, useEffect } from 'react'
-import axios from 'axios'
-import { Trash2, Edit } from 'lucide-react'
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Trash2, Edit } from "lucide-react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const API_URL = "https://673219817aaf2a9aff1373f1.mockapi.io/plant-tracker"
+const API_URL = "https://673219817aaf2a9aff1373f1.mockapi.io/plant-tracker";
 
 export default function BudidayaTracker() {
-  const [plants, setPlants] = useState([])
+  const [plants, setPlants] = useState([]);
   const [newPlant, setNewPlant] = useState({
-    name: '',
-    plantingDate: '',
-    type: '',
-    quantity: 0
-  })
-  const [isEditing, setIsEditing] = useState(false)
-  const [editingId, setEditingId] = useState('')
+    name: "",
+    plantingDate: "",
+    type: "",
+    quantity: 0,
+    wateringTime: "",
+  });
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState("");
+  const [wateringTime, setWateringTime] = useState(""); // State for watering time
+  const [notifiedPlants, setNotifiedPlants] = useState([]);
+  const notificationSound = new Audio("/sound/notif.mp3");
 
   useEffect(() => {
-    fetchPlants()
-  }, [])
+    fetchPlants();
+  }, []);
+
+  useEffect(() => {
+    const checkWateringTime = () => {
+      const currentTime = new Date();
+  
+      plants.forEach((plant) => {
+        if (!plant.wateringTime) return; // Lewati tanaman yang tidak memiliki waktu penyiraman
+  
+        const [hours, minutes] = plant.wateringTime.split(":");
+        const wateringDate = new Date();
+        wateringDate.setHours(hours, minutes, 0, 0);
+  
+        // Cek jika waktu saat ini mendekati waktu penyiraman (dalam rentang 1 menit)
+        const timeDifference = Math.abs(currentTime - wateringDate) / 1000; // dalam detik
+  
+        if (timeDifference < 60 && !notifiedPlants.includes(plant.id)) {
+          notificationSound.play();
+          // Menampilkan toast notifikasi
+          toast.info(`Waktu penyiraman untuk tanaman ${plant.name} telah tiba! 🌱`, {
+            position: "bottom-right",
+            autoClose: false,
+            hideProgressBar: false,
+            closeOnClick: false,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+            closeButton: true,
+          });
+          
+          // Tandai tanaman ini telah diberi notifikasi
+          setNotifiedPlants((prev) => [...prev, plant.id]);
+        }
+      });
+    };
+  
+    const interval = setInterval(checkWateringTime, 60000); // Cek setiap menit
+  
+    return () => clearInterval(interval); // Cleanup saat unmount
+  }, [plants, notifiedPlants]);
+  
+  
 
   const fetchPlants = async () => {
     try {
-      const response = await axios.get(API_URL)
-      setPlants(response.data)
+      const response = await axios.get(API_URL);
+      setPlants(response.data);
     } catch (error) {
-      console.error('Error fetching plants:', error)
+      console.error("Error fetching plants:", error);
     }
-  }
+  };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setNewPlant(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setNewPlant((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
+    const plantData = {
+      ...newPlant,
+      wateringTime, // Tambahkan wateringTime di sini
+    };
     if (isEditing) {
-      await updatePlant(editingId, newPlant)
+      await updatePlant(editingId, plantData);
     } else {
-      await addPlant(newPlant)
+      await addPlant(plantData);
     }
-    setNewPlant({ name: '', plantingDate: '', type: '', quantity: 0 })
-    setIsEditing(false)
-    setEditingId('')
-  }
+    setNewPlant({ name: "", plantingDate: "", type: "", quantity: 0 });
+    setWateringTime("");
+    setIsEditing(false);
+    setEditingId("");
+  };
 
   const addPlant = async (plant) => {
     try {
-      await axios.post(API_URL, plant)
-      fetchPlants()
+      await axios.post(API_URL, plant);
+      fetchPlants();
     } catch (error) {
-      console.error('Error adding plant:', error)
+      console.error("Error adding plant:", error);
     }
-  }
+  };
 
   const updatePlant = async (id, plant) => {
     try {
-      await axios.put(`${API_URL}/${id}`, plant)
-      fetchPlants()
+      await axios.put(`${API_URL}/${id}`, plant);
+      fetchPlants();
     } catch (error) {
-      console.error('Error updating plant:', error)
+      console.error("Error updating plant:", error);
     }
-  }
+  };
 
   const deletePlant = async (id) => {
     try {
-      await axios.delete(`${API_URL}/${id}`)
-      fetchPlants()
+      await axios.delete(`${API_URL}/${id}`);
+      fetchPlants();
     } catch (error) {
-      console.error('Error deleting plant:', error)
+      console.error("Error deleting plant:", error);
     }
-  }
+  };
 
   const handleEdit = (plant) => {
-    setIsEditing(true)
-    setEditingId(plant.id)
+    setIsEditing(true);
+    setEditingId(plant.id);
     setNewPlant({
       name: plant.name,
       plantingDate: plant.plantingDate,
       type: plant.type,
-      quantity: plant.quantity
-    })
-  }
+      quantity: plant.quantity,
+    });
+    setWateringTime(plant.wateringTime || "");
+  };
 
   return (
     <div className="container mx-auto px-4 py-16">
-      <h1 className="text-4xl font-bold text-[#142e38] mb-8">Budidaya Tracker</h1>
+      <h1 className="text-4xl font-bold text-[#142e38] mb-8">
+        Budidaya Tracker
+      </h1>
       <div className="bg-white p-6 rounded-lg shadow-md mb-8">
         <h2 className="text-2xl font-semibold mb-4 text-[#142e38]">
-          {isEditing ? 'Edit Tanaman' : 'Tambah Tanaman Baru'}
+          {isEditing ? "Edit Tanaman" : "Tambah Tanaman Baru"}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-[#142e38] mb-1">Nama Tanaman</label>
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-[#142e38] mb-1"
+              >
+                Nama Tanaman
+              </label>
               <input
                 id="name"
                 name="name"
@@ -105,7 +165,12 @@ export default function BudidayaTracker() {
               />
             </div>
             <div>
-              <label htmlFor="plantingDate" className="block text-sm font-medium text-[#142e38] mb-1">Tanggal Penanaman</label>
+              <label
+                htmlFor="plantingDate"
+                className="block text-sm font-medium text-[#142e38] mb-1"
+              >
+                Tanggal Penanaman
+              </label>
               <input
                 id="plantingDate"
                 name="plantingDate"
@@ -117,7 +182,12 @@ export default function BudidayaTracker() {
               />
             </div>
             <div>
-              <label htmlFor="type" className="block text-sm font-medium text-[#142e38] mb-1">Jenis Tanaman</label>
+              <label
+                htmlFor="type"
+                className="block text-sm font-medium text-[#142e38] mb-1"
+              >
+                Jenis Tanaman
+              </label>
               <select
                 id="type"
                 name="type"
@@ -134,7 +204,12 @@ export default function BudidayaTracker() {
               </select>
             </div>
             <div>
-              <label htmlFor="quantity" className="block text-sm font-medium text-[#142e38] mb-1">Jumlah Tanaman</label>
+              <label
+                htmlFor="quantity"
+                className="block text-sm font-medium text-[#142e38] mb-1"
+              >
+                Jumlah Tanaman
+              </label>
               <input
                 id="quantity"
                 name="quantity"
@@ -146,18 +221,36 @@ export default function BudidayaTracker() {
                 className="w-full p-2 border border-gray-300 rounded"
               />
             </div>
+            <div>
+              <label
+                htmlFor="wateringTime"
+                className="block text-sm font-medium text-[#142e38] mb-1"
+              >
+                Jam Penyiraman
+              </label>
+              <input
+                id="wateringTime"
+                type="time"
+                value={wateringTime}
+                onChange={(e) => setWateringTime(e.target.value)}
+                required
+                className="w-full p-2 border border-gray-300 rounded"
+              />
+            </div>
           </div>
           <button
             type="submit"
             className="bg-[#318161] text-white px-4 py-2 rounded hover:bg-[#265a4a] transition-colors"
           >
-            {isEditing ? 'Update' : 'Tambah'} Tanaman
+            {isEditing ? "Update" : "Tambah"} Tanaman
           </button>
         </form>
       </div>
-
+      
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold mb-4 text-[#142e38]">Daftar Tanaman</h2>
+        <h2 className="text-2xl font-semibold mb-4 text-[#142e38]">
+          Daftar Tanaman
+        </h2>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -166,6 +259,8 @@ export default function BudidayaTracker() {
                 <th className="p-2 text-left">Jenis</th>
                 <th className="p-2 text-left">Tanggal Tanam</th>
                 <th className="p-2 text-left">Jumlah</th>
+                <th className="p-2 text-left">Jam Penyiraman</th>{" "}
+                {/* New column for watering time */}
                 <th className="p-2 text-left">Aksi</th>
               </tr>
             </thead>
@@ -176,6 +271,7 @@ export default function BudidayaTracker() {
                   <td className="p-2">{plant.type}</td>
                   <td className="p-2">{plant.plantingDate}</td>
                   <td className="p-2">{plant.quantity}</td>
+                  <td className="p-2">{plant.wateringTime || "Belum diatur"}</td>
                   <td className="p-2">
                     <button
                       onClick={() => handleEdit(plant)}
@@ -195,7 +291,8 @@ export default function BudidayaTracker() {
             </tbody>
           </table>
         </div>
+        <ToastContainer />
       </div>
     </div>
-  )
+  );
 }
