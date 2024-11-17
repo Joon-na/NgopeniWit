@@ -42,7 +42,7 @@ const Navbar = () => {
       <div className="md:px-16 px-6 py-4 flex justify-between items-center">
         {/* Logo atau Nama Website */}
         <div className="w-40">
-          <Link to="/"><img src="./src/assets/images/Logo.svg" alt="logo" /></Link>
+          <Link to="/"><img src="/images/logo.svg" alt="logo" /></Link>
         </div>
 
         {/* Menu Navbar untuk Desktop */}
