@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import AIChatOverlay from '../components/AIChatOverlay';
 
+
 function Layout() {
   return (
     <>

@@ -3,8 +3,8 @@ import { Facebook, Instagram, Twitter, Mail } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-white text-[#142e38]">
-      <div className="container mx-auto px-4 py-12">
+    <footer className="bg-white text-[#142e38] border-t">
+      <div className="container mx-auto px-4 pt-6 pb-3">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pl-9">
           <div className="mb-8 md:mb-0">
             <div className="w-52">
@@ -151,7 +151,7 @@ const Footer = () => {
             </p>
           </div>
         </div>
-        <div className="border-t border-[#142e38] mt-8 pt-8 text-center text-sm">
+        <div className="border-t mt-8 pt-2 text-center text-sm">
           <p>
             &copy; {new Date().getFullYear()} NgopeniWit. All Right Reserved.
           </p>

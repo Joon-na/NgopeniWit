@@ -29,12 +29,12 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Enhanced Blur Background */}
+      
       <div className="absolute inset-0 z-0 overflow-hidden">
-        <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+        <svg className="absolute inset-0 w-full h-full">
           <defs>
             <filter id="blurFilter">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="180" />
+              <feGaussianBlur in="SourceGraphic" stdDeviation="120" />
             </filter>
           </defs>
           <g filter="url(#blurFilter)">
