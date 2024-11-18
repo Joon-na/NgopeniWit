@@ -7,7 +7,7 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarEle
 
 const API_URL = "https://673219817aaf2a9aff1373f1.mockapi.io/plant-tracker"
 
-export default function PlantStatistics() {
+export default function PlantStatistics({user}) {
   const [plants, setPlants] = useState([])
   const [stats, setStats] = useState({
     totalPlants: 0,
@@ -18,14 +18,17 @@ export default function PlantStatistics() {
   })
 
   useEffect(() => {
+    if (user){
     fetchPlants()
-  }, [])
+  }
+  }, [user])
 
   const fetchPlants = async () => {
     try {
       const response = await axios.get(API_URL)
-      setPlants(response.data)
-      calculateStatistics(response.data)
+      const userPlants = response.data.filter(plant => plant.userId === user.id)
+      setPlants(userPlants)
+      calculateStatistics(userPlants)
     } catch (error) {
       console.error('Error fetching plants:', error)
     }

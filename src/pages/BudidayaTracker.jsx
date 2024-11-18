@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Trash2, Edit } from "lucide-react";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content"
 
 const PLANT_API_URL = import.meta.env.VITE_API_URL_PLANT;
+const MySwal = withReactContent(Swal);
 
-export default function BudidayaTracker() {
+export default function BudidayaTracker({ user }) {
   const [plants, setPlants] = useState([]);
   const [formState, setFormState] = useState({
     name: "",
@@ -22,8 +23,10 @@ export default function BudidayaTracker() {
   const notificationSound = new Audio("/sound/notif.mp3");
 
   useEffect(() => {
-    fetchPlants();
-  }, []);
+    if (user) {
+      fetchPlants();
+    }
+  }, [user]);
 
   useEffect(() => {
     const checkWateringTime = () => {
@@ -41,20 +44,13 @@ export default function BudidayaTracker() {
 
         if (timeDifference < 60 && !notifiedPlants.includes(plant.id)) {
           notificationSound.play();
-          // Menampilkan toast notifikasi
-          toast.info(
-            `Waktu penyiraman untuk tanaman ${plant.name} telah tiba!`,
-            {
-              position: "bottom-right",
-              autoClose: false,
-              hideProgressBar: false,
-              closeOnClick: false,
-              draggable: true,
-              progress: undefined,
-              theme: "dark",
-              closeButton: true,
-            }
-          );
+          
+          MySwal.fire({
+            title: `Penyiraman Tanaman!`,
+            text: `Waktu penyiraman untuk tanaman ${plant.name} telah tiba!`,
+            icon: "info",
+            confirmButtonText: "OK",
+          });
 
           // menandai tanaman ini telah diberi notifikasi
           setNotifiedPlants((prev) => [...prev, plant.id]);
@@ -69,10 +65,17 @@ export default function BudidayaTracker() {
   const fetchPlants = async () => {
     try {
       const response = await axios.get(PLANT_API_URL);
-      setPlants(response.data);
+      const userPlants = response.data.filter(
+        (plant) => plant.userId === user.id
+      );
+      setPlants(userPlants);
     } catch (error) {
       console.error("Error fetching plants:", error);
-      toast.error("Gagal memuat data tanaman");
+      MySwal.fire({
+        title: "Error",
+        text: "Gagal menyimpan data tanaman!",
+        icon: "error",
+      });
     }
   };
 
@@ -84,11 +87,19 @@ export default function BudidayaTracker() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const plantData = { ...formState, userId: user.id };
       if (isEditing) {
         // Update data tanaman
-        const response = await axios.put(`${PLANT_API_URL}/${editingId}`, formState);
-        toast.success("Data tanaman berhasil diperbarui!");
-        
+        const response = await axios.put(
+          `${PLANT_API_URL}/${editingId}`,
+          plantData
+        );
+        MySwal.fire({
+          title: "Berhasil!",
+          text: "Data tanaman berhasil diperbarui!",
+          icon: "success",
+        });
+
         // Update langsung data tanaman di state
         setPlants((prev) =>
           prev.map((plant) =>
@@ -98,9 +109,13 @@ export default function BudidayaTracker() {
         setNotifiedPlants((prev) => prev.filter((id) => id !== editingId));
       } else {
         // Menambahkan tanaman baru
-        const response = await axios.post(PLANT_API_URL, formState);
-        toast.success("Tanaman berhasil ditambahkan!");
-        
+        const response = await axios.post(PLANT_API_URL, plantData);
+        MySwal.fire({
+          title: "Berhasil!",
+          text: "Tanaman berhasil ditambahkan!",
+          icon: "success",
+        });
+
         // Menambahkan data tanaman baru ke state
         setPlants((prev) => [...prev, response.data]);
       }
@@ -114,12 +129,29 @@ export default function BudidayaTracker() {
 
   const deletePlant = async (id) => {
     try {
-      await axios.delete(`${PLANT_API_URL}/${id}`);
-      toast.success("Tanaman berhasil dihapus!");
-      fetchPlants();
+      const result = await MySwal.fire({
+        title: "Konfirmasi",
+        text: "Apakah Anda yakin ingin menghapus tanaman ini?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Hapus",
+      });
+
+      if (result.isConfirmed) {
+        await axios.delete(`${PLANT_API_URL}/${id}`);
+        setPlants((prev) => prev.filter((plant) => plant.id !== id));
+        MySwal.fire("Berhasil!", "Tanaman berhasil dihapus!", "success");
+        fetchPlants();
+      }
     } catch (error) {
       console.error("Error deleting plant:", error);
-      toast.error("Gagal menghapus tanaman!");
+      MySwal.fire({
+        title: "Error",
+        text: "Gagal menghapus tanaman!",
+        icon: "error",
+      });
     }
   };
 
@@ -304,7 +336,6 @@ export default function BudidayaTracker() {
             </tbody>
           </table>
         </div>
-        <ToastContainer />
       </div>
     </div>
   );
