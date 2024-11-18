@@ -4,22 +4,22 @@ import { Trash2, Edit } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const API_URL = "https://673219817aaf2a9aff1373f1.mockapi.io/plant-tracker";
+const PLANT_API_URL = import.meta.env.VITE_API_URL_PLANT;
 
 export default function BudidayaTracker() {
   const [plants, setPlants] = useState([]);
-  const [newPlant, setNewPlant] = useState({
+  const [formState, setFormState] = useState({
     name: "",
     plantingDate: "",
     type: "",
     quantity: 0,
     wateringTime: "",
   });
+
   const [isEditing, setIsEditing] = useState(false);
-  const [editingId, setEditingId] = useState("");
-  const [wateringTime, setWateringTime] = useState("");
+  const [editingId, setEditingId] = useState(null);
   const [notifiedPlants, setNotifiedPlants] = useState([]);
-  const notificationSound = new Audio("./src/assets/sound/notif.mp3");
+  const notificationSound = new Audio("/sound/notif.mp3");
 
   useEffect(() => {
     fetchPlants();
@@ -28,112 +28,123 @@ export default function BudidayaTracker() {
   useEffect(() => {
     const checkWateringTime = () => {
       const currentTime = new Date();
-  
+
       plants.forEach((plant) => {
         if (!plant.wateringTime) return; // Lewati tanaman yang tidak memiliki waktu penyiraman
-  
+
         const [hours, minutes] = plant.wateringTime.split(":");
-        const wateringDate = new Date();
-        wateringDate.setHours(hours, minutes, 0, 0);
-  
+        const wateringTime = new Date();
+        wateringTime.setHours(hours, minutes, 0, 0);
+
         // Cek jika waktu saat ini mendekati waktu penyiraman (dalam rentang 1 menit)
-        const timeDifference = Math.abs(currentTime - wateringDate) / 1000; // dalam detik
-  
+        const timeDifference = Math.abs(currentTime - wateringTime) / 1000; // dalam detik
+
         if (timeDifference < 60 && !notifiedPlants.includes(plant.id)) {
           notificationSound.play();
           // Menampilkan toast notifikasi
-          toast.info(`Waktu penyiraman untuk tanaman ${plant.name} telah tiba!`, {
-            position: "bottom-right",
-            autoClose: false,
-            hideProgressBar: false,
-            closeOnClick: false,
-            draggable: true,
-            progress: undefined,
-            theme: "dark",
-            closeButton: true,
-          });
-          
-          // Tandai tanaman ini telah diberi notifikasi
+          toast.info(
+            `Waktu penyiraman untuk tanaman ${plant.name} telah tiba!`,
+            {
+              position: "bottom-right",
+              autoClose: false,
+              hideProgressBar: false,
+              closeOnClick: false,
+              draggable: true,
+              progress: undefined,
+              theme: "dark",
+              closeButton: true,
+            }
+          );
+
+          // menandai tanaman ini telah diberi notifikasi
           setNotifiedPlants((prev) => [...prev, plant.id]);
         }
       });
     };
-  
-    const interval = setInterval(checkWateringTime, 60000); // Cek setiap menit
-  
+
+    const interval = setInterval(checkWateringTime, 10000);
     return () => clearInterval(interval); // Cleanup saat unmount
   }, [plants, notifiedPlants]);
-  
-  
 
   const fetchPlants = async () => {
     try {
-      const response = await axios.get(API_URL);
+      const response = await axios.get(PLANT_API_URL);
       setPlants(response.data);
     } catch (error) {
       console.error("Error fetching plants:", error);
+      toast.error("Gagal memuat data tanaman");
     }
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewPlant((prev) => ({ ...prev, [name]: value }));
+    setFormState((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const plantData = {
-      ...newPlant,
-      wateringTime, // Tambahkan wateringTime di sini
-    };
-    if (isEditing) {
-      await updatePlant(editingId, plantData);
-    } else {
-      await addPlant(plantData);
-    }
-    setNewPlant({ name: "", plantingDate: "", type: "", quantity: 0 });
-    setWateringTime("");
-    setIsEditing(false);
-    setEditingId("");
-  };
-
-  const addPlant = async (plant) => {
     try {
-      await axios.post(API_URL, plant);
-      fetchPlants();
-    } catch (error) {
-      console.error("Error adding plant:", error);
-    }
-  };
+      if (isEditing) {
+        // Update data tanaman
+        const response = await axios.put(`${PLANT_API_URL}/${editingId}`, formState);
+        toast.success("Data tanaman berhasil diperbarui!");
+        
+        // Update langsung data tanaman di state
+        setPlants((prev) =>
+          prev.map((plant) =>
+            plant.id === editingId ? { ...plant, ...formState } : plant
+          )
+        );
+        setNotifiedPlants((prev) => prev.filter((id) => id !== editingId));
+      } else {
+        // Menambahkan tanaman baru
+        const response = await axios.post(PLANT_API_URL, formState);
+        toast.success("Tanaman berhasil ditambahkan!");
+        
+        // Menambahkan data tanaman baru ke state
+        setPlants((prev) => [...prev, response.data]);
+      }
 
-  const updatePlant = async (id, plant) => {
-    try {
-      await axios.put(`${API_URL}/${id}`, plant);
-      fetchPlants();
+      resetForm();
     } catch (error) {
-      console.error("Error updating plant:", error);
+      console.error("Error saving plant:", error);
+      toast.error("Gagal menyimpan data tanaman!");
     }
   };
 
   const deletePlant = async (id) => {
     try {
-      await axios.delete(`${API_URL}/${id}`);
+      await axios.delete(`${PLANT_API_URL}/${id}`);
+      toast.success("Tanaman berhasil dihapus!");
       fetchPlants();
     } catch (error) {
       console.error("Error deleting plant:", error);
+      toast.error("Gagal menghapus tanaman!");
     }
   };
 
   const handleEdit = (plant) => {
-    setIsEditing(true);
-    setEditingId(plant.id);
-    setNewPlant({
+    setFormState({
       name: plant.name,
       plantingDate: plant.plantingDate,
       type: plant.type,
       quantity: plant.quantity,
+      wateringTime: plant.wateringTime,
     });
-    setWateringTime(plant.wateringTime || "");
+    setIsEditing(true);
+    setEditingId(plant.id);
+  };
+
+  const resetForm = () => {
+    setFormState({
+      name: "",
+      plantingDate: "",
+      type: "",
+      quantity: 0,
+      wateringTime: "",
+    });
+    setIsEditing(false);
+    setEditingId(null);
   };
 
   return (
@@ -157,7 +168,7 @@ export default function BudidayaTracker() {
               <input
                 id="name"
                 name="name"
-                value={newPlant.name}
+                value={formState.name}
                 onChange={handleInputChange}
                 placeholder="Masukkan nama tanaman"
                 required
@@ -175,7 +186,7 @@ export default function BudidayaTracker() {
                 id="plantingDate"
                 name="plantingDate"
                 type="date"
-                value={newPlant.plantingDate}
+                value={formState.plantingDate}
                 onChange={handleInputChange}
                 required
                 className="w-full p-2 border border-gray-300 rounded"
@@ -191,7 +202,7 @@ export default function BudidayaTracker() {
               <select
                 id="type"
                 name="type"
-                value={newPlant.type}
+                value={formState.type}
                 onChange={handleInputChange}
                 required
                 className="w-full p-2 border border-gray-300 rounded"
@@ -214,7 +225,7 @@ export default function BudidayaTracker() {
                 id="quantity"
                 name="quantity"
                 type="number"
-                value={newPlant.quantity}
+                value={formState.quantity}
                 onChange={handleInputChange}
                 min="1"
                 required
@@ -230,9 +241,10 @@ export default function BudidayaTracker() {
               </label>
               <input
                 id="wateringTime"
+                name="wateringTime"
                 type="time"
-                value={wateringTime}
-                onChange={(e) => setWateringTime(e.target.value)}
+                value={formState.wateringTime}
+                onChange={handleInputChange}
                 required
                 className="w-full p-2 border border-gray-300 rounded"
               />
@@ -246,7 +258,7 @@ export default function BudidayaTracker() {
           </button>
         </form>
       </div>
-      
+
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-2xl font-semibold mb-4 text-[#142e38]">
           Daftar Tanaman
@@ -259,8 +271,7 @@ export default function BudidayaTracker() {
                 <th className="p-2 text-left">Jenis</th>
                 <th className="p-2 text-left">Tanggal Tanam</th>
                 <th className="p-2 text-left">Jumlah</th>
-                <th className="p-2 text-left">Jam Penyiraman</th>{" "}
-                {/* New column for watering time */}
+                <th className="p-2 text-left">Jam Penyiraman</th>
                 <th className="p-2 text-left">Aksi</th>
               </tr>
             </thead>
@@ -271,7 +282,9 @@ export default function BudidayaTracker() {
                   <td className="p-2">{plant.type}</td>
                   <td className="p-2">{plant.plantingDate}</td>
                   <td className="p-2">{plant.quantity}</td>
-                  <td className="p-2">{plant.wateringTime || "Belum diatur"}</td>
+                  <td className="p-2">
+                    {plant.wateringTime || "Belum diatur"}
+                  </td>
                   <td className="p-2">
                     <button
                       onClick={() => handleEdit(plant)}
