@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const infoBudidaya = [
   {
@@ -29,10 +30,11 @@ const truncateDescription = (text, maxLength = 70) => {
 };
 
 export default function InfoBudidaya() {
+  const navigate = useNavigate();
   return (
     <section className="bg-gradient-to-b from-white to-green-50 py-16 relative overflow-hidden">
       <div className="container mx-auto px-4 md:px-8">
-        <h2 className="text-[#142e38] text-center text-4xl font-bold mb-10 font-['Poppins']">
+        <h2 className="text-[#142e38] mt-4 text-center text-4xl font-bold mb-10 font-['Poppins']">
           Info Budidaya
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -51,7 +53,8 @@ export default function InfoBudidaya() {
               <p className="text-[#142e38] text-base mb-6">
                 {truncateDescription(item.description)}
               </p>
-              <button className="px-6 py-2 bg-[#318161] text-white font-poppins rounded-full border-2 border-[#318161] hover:bg-transparent hover:text-[#318161] transition-all duration-300 ease-in-out transform hover:scale-105">
+              <button className="px-6 py-2 bg-[#318161] text-white font-poppins rounded-full border-2 border-[#318161] hover:bg-transparent hover:text-[#318161] transition-all duration-300 ease-in-out transform hover:scale-105"
+              onClick={() => navigate(`/detail/${index + 1}`)}>
                 Learn More
               </button>
             </div>
