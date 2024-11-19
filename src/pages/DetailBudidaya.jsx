@@ -8,8 +8,9 @@ export default function DetailBudidaya() {
   const [activeTab, setActiveTab] = useState("preparation");
 
   useEffect(() => {
+    const plantAPIURL = import.meta.env.VITE_API_URL_PLANT_DETAIL;
     axios
-      .get(`https://673b790f339a4ce4451c5752.mockapi.io/api/v1/plant-detail/${id}`)
+      .get(`${plantAPIURL}/${id}`)
       .then((response) => setPlant(response.data))
       .catch((error) => console.error("Error fetching plant details:", error));
   }, [id]);
