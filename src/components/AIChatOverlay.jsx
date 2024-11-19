@@ -6,12 +6,7 @@ import {
   Loader2,
   Sprout,
 } from "lucide-react";
-import axios from "axios";
-
-const API_KEY = import.meta.env.VITE_API_KEY;
-const API_URL = import.meta.env.VITE_API_URL;
-
-console.log(`API_KEY`);
+import { fetchAIResponse } from "../services/fetchAIResponse";
 
 export default function AIChatOverlay() {
   const [isOpen, setIsOpen] = useState(false);
@@ -36,17 +31,13 @@ export default function AIChatOverlay() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`${API_URL}?key=${API_KEY}`, {
-        contents: [{ parts: [{ text: input }] }],
-      });
-
+      const aiResponse = await fetchAIResponse(input); // Panggil fungsi dari service
       const aiMessage = {
         role: "ai",
-        content: response.data.candidates[0].content.parts[0].text,
+        content: aiResponse,
       };
       setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
-      console.error("Error:", error);
       const errorMessage = {
         role: "ai",
         content: "Maaf, saya mengalami kesalahan. Silakan coba lagi.",
@@ -56,6 +47,7 @@ export default function AIChatOverlay() {
       setIsLoading(false);
     }
   };
+
 
   return (
     <>

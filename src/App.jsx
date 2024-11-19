@@ -3,11 +3,12 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './pages/Layout';
 import Home from './pages/Home';
 import BudidayaTracker from './pages/BudidayaTracker';
-import Statistics from './pages/Statistics';
+import PlantStatistics from './pages/Statistics';
 import InfoBudidaya from './pages/InfoBudidaya';
 import About from './pages/About';
 import Login from './pages/Login';
 import PrivateRoute from './components/PrivateRoute';
+import DetailBudidaya from './pages/DetailBudidaya';
 
 function App() {
   const [user, setUser ] = useState(null);
@@ -28,13 +29,14 @@ function App() {
           <Route index element={<Home />} />
           <Route path="about" element={<About />} />
           <Route path="login" element={<Login setUser ={setUser } />} />
-          <Route 
+          <Route path="info-budidaya" element={<InfoBudidaya />} />
+          <Route path="/detail/:id" element={<DetailBudidaya />} />
+          <Route path="statistics" element={<PlantStatistics user={user} />} />
+        </Route>
+        <Route 
             path="budidaya-tracker" 
             element={<PrivateRoute element={<BudidayaTracker user={user} />} user={user} />} 
           />
-          <Route path="info-budidaya" element={<InfoBudidaya />} />
-          <Route path="statistics" element={<Statistics />} />
-        </Route>
       </Routes>
     </Router>
   );

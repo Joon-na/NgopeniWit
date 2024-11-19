@@ -2,12 +2,15 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Pie, Bar } from 'react-chartjs-2'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js'
+import { useNavigate } from 'react-router-dom'
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title)
 
-const API_URL = "https://673219817aaf2a9aff1373f1.mockapi.io/plant-tracker"
+const PLANT_API_URL = import.meta.env.VITE_API_URL_PLANT
 
-export default function PlantStatistics({user}) {
+export default function Statistics() {
+  const navigate = useNavigate()
+  const [user, setUser] = useState(null)
   const [plants, setPlants] = useState([])
   const [stats, setStats] = useState({
     totalPlants: 0,
@@ -18,14 +21,23 @@ export default function PlantStatistics({user}) {
   })
 
   useEffect(() => {
-    if (user){
-    fetchPlants()
-  }
+    const storedUser = JSON.parse(localStorage.getItem('user'))
+    if (storedUser) {
+      setUser(storedUser)
+    } else {
+      navigate('/login')
+    }
+  }, [navigate])
+
+  useEffect(() => {
+    if (user) {
+      fetchPlants()
+    }
   }, [user])
 
   const fetchPlants = async () => {
     try {
-      const response = await axios.get(API_URL)
+      const response = await axios.get(PLANT_API_URL)
       const userPlants = response.data.filter(plant => plant.userId === user.id)
       setPlants(userPlants)
       calculateStatistics(userPlants)
@@ -33,15 +45,16 @@ export default function PlantStatistics({user}) {
       console.error('Error fetching plants:', error)
     }
   }
+
   const calculateStatistics = (plants) => {
-    const totalPlants = plants.reduce((acc, plant) => acc + parseInt(plant.quantity, 10), 0) // Total quantity of plants
+    const totalPlants = plants.reduce((acc, plant) => acc + parseInt(plant.quantity, 10), 0)
     const typeCounts = plants.reduce((acc, plant) => {
       acc[plant.type] = (acc[plant.type] || 0) + 1
       return acc
     }, {})
   
     const totalQuantityPerType = plants.reduce((acc, plant) => {
-      acc[plant.type] = (acc[plant.type] || 0) + parseInt(plant.quantity, 10) // Ensure quantity is an integer
+      acc[plant.type] = (acc[plant.type] || 0) + parseInt(plant.quantity, 10)
       return acc
     }, {})
   
@@ -57,7 +70,6 @@ export default function PlantStatistics({user}) {
       totalQuantityPerType
     })
   }
-  
 
   const calculateMonthlyData = (plants) => {
     const monthlyCount = {}
@@ -92,56 +104,58 @@ export default function PlantStatistics({user}) {
     ]
   }
 
+  if (!user) {
+    return <div className="text-center py-8">Loading...</div>
+  }
+
   return (
     <div className="container mx-auto px-4 py-16">
-      <h1 className="text-3xl font-bold mb-6">Statistik Budidaya Tanaman</h1>
+      <h1 className="text-3xl mt-4 text-center font-bold mb-6">Statistik Tanaman Anda</h1>
       
-      {/* Statistic Summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <div className="bg-white shadow-md p-4 rounded-lg">
           <h2 className="text-xl font-semibold">Total Tanaman</h2>
-          <p className="text-2xl font-bold">{stats.totalPlants}</p> {/* Total quantity of plants */}
+          <p className="text-2xl font-bold">{stats.totalPlants}</p>
         </div>
         <div className="bg-white shadow-md p-4 rounded-lg">
           <h2 className="text-xl font-semibold">Jenis Tanaman Terbanyak</h2>
-          <p className="text-2xl font-bold">{stats.mostCommonType}</p> {/* Most common plant type */}
+          <p className="text-2xl font-bold">{stats.mostCommonType}</p>
         </div>
         <div className="bg-white shadow-md p-4 rounded-lg">
           <h2 className="text-xl font-semibold">Jumlah Tanaman per Jenis</h2>
-          <div className="text-2xl font-bold">
-            {Object.keys(stats.totalQuantityPerType).map((type, idx) => (
-              <div key={idx} className="my-2">
-                <span>{type}: </span>
-                <span>{stats.totalQuantityPerType[type]}</span>
+          <div className="text-lg">
+            {Object.entries(stats.totalQuantityPerType).map(([type, count]) => (
+              <div key={type} className="flex justify-between items-center">
+                <span>{type}:</span>
+                <span className="font-bold">{count}</span>
               </div>
             ))}
-          </div> {/* Total quantity per type */}
+          </div>
         </div>
       </div>
 
-      {/* Charts Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        
-        {/* Pie Chart */}
         <div className="bg-white shadow-md p-6 rounded-lg">
           <h3 className="text-lg font-semibold mb-4">Distribusi Jenis Tanaman</h3>
           <Pie data={pieData} />
         </div>
 
-        {/* Bar Chart */}
         <div className="bg-white shadow-md p-6 rounded-lg">
           <h3 className="text-lg font-semibold mb-4">Penanaman Tanaman per Bulan</h3>
-          <Bar data={barData} options={{
-            responsive: true,
-            plugins: {
-              legend: { position: 'top' },
-              title: { display: true, text: 'Penanaman Tanaman per Bulan' }
-            },
-            scales: {
-              x: { title: { display: true, text: 'Bulan' } },
-              y: { title: { display: true, text: 'Jumlah Penanaman' } }
-            }
-          }} />
+          <Bar
+            data={barData}
+            options={{
+              responsive: true,
+              plugins: {
+                legend: { position: 'top' },
+                title: { display: true, text: 'Penanaman Tanaman per Bulan' }
+              },
+              scales: {
+                x: { title: { display: true, text: 'Bulan' } },
+                y: { title: { display: true, text: 'Jumlah Penanaman' } }
+              }
+            }}
+          />
         </div>
       </div>
     </div>
