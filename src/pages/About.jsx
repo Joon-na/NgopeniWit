@@ -16,7 +16,7 @@ export default function About() {
               transition={{ duration: 0.5 }}
             >
               <h1 className="text-4xl md:text-5xl font-bold text-[#142e38] mb-6">
-                Tentang NgopeniWit
+                About Us
               </h1>
               <p className="text-lg text-[#142e38] mb-8">
                 NgopeniWit adalah platform inovatif yang didedikasikan untuk

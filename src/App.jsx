@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Layout from './pages/Layout';
+import Layout from './layouts/Layout';
 import Home from './pages/Home';
 import BudidayaTracker from './pages/BudidayaTracker';
 import PlantStatistics from './pages/Statistics';
 import InfoBudidaya from './pages/InfoBudidaya';
 import About from './pages/About';
 import Login from './pages/Login';
-import PrivateRoute from './components/PrivateRoute';
+import PrivateRoute from './middleware/PrivateRoute';
 import DetailBudidaya from './pages/DetailBudidaya';
 
 function App() {
