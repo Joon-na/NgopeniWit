@@ -5,7 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export const fetchAIResponse = async (input) => {
   try {
-    const prompt = `You are an expert in plant cultivation. Please only respond to questions related to plant care, solutions for plant problems, care schedules, and plant recommendations. User question: ${input}`;
+    const prompt = `Anda ahli dalam budidaya tanaman. Harap hanya menjawab pertanyaan terkait perawatan tanaman, solusi masalah tanaman, jadwal perawatan, dan rekomendasi tanaman. Pertanyaan pengguna: ${input}`;
     
     const response = await axios.post(`${API_URL}?key=${API_KEY}`, {
       contents: [{ parts: [{ text: prompt }] }],
