@@ -48,7 +48,6 @@ export default function AIChatOverlay() {
     }
   };
 
-
   return (
     <>
       <button
@@ -108,7 +107,7 @@ export default function AIChatOverlay() {
                       <div className="w-2 h-2 rounded-full bg-[#318161]" />
                       Tips perawatan tanaman
                     </li>
-                    <li className="flex items-center gap-2">
+                    <li className="flex items-center gap- 2">
                       <div className="w-2 h-2 rounded-full bg-[#318161]" />
                       Solusi masalah tanaman
                     </li>
@@ -139,7 +138,7 @@ export default function AIChatOverlay() {
                       : "bg-white text-gray-800 border border-gray-200"
                   }`}
                 >
-                  {message.content}
+                  {message.content} {/* This will now be plain text without markdown */}
                 </div>
               </div>
             ))}
